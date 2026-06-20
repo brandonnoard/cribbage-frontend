@@ -64,7 +64,7 @@ export function UserDetailPage() {
         <p className="mt-2 font-mono text-xs text-slate-500">{user.id}</p>
       </div>
 
-      {updateUser.isSuccess ? <Alert variant="success" message="Display name updated." /> : null}
+      {updateUser.isSuccess ? <Alert variant="success" message="Profile updated." /> : null}
 
       {updateUser.isError ? (
         <Alert title="Update failed" message={errorMessage(updateUser.error)} />
@@ -72,14 +72,22 @@ export function UserDetailPage() {
 
       {canUpdate ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
-          <h2 className="mb-4 text-lg font-medium text-white">Edit display name</h2>
+          <h2 className="mb-4 text-lg font-medium text-white">Edit profile</h2>
           <UserForm
             mode="edit"
-            initialValues={{ displayName: user.displayName }}
+            initialValues={{
+              displayName: user.displayName,
+              givenName: user.givenName ?? "",
+              surname: user.surname ?? "",
+            }}
             submitLabel="Save changes"
             isSubmitting={updateUser.isPending}
             onSubmit={(values) => {
-              updateUser.mutate({ displayName: values.displayName });
+              updateUser.mutate({
+                displayName: values.displayName,
+                givenName: values.givenName,
+                surname: values.surname,
+              });
             }}
           />
         </div>

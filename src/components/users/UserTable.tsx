@@ -8,6 +8,10 @@ type UserTableProps = Readonly<{
   accessTokenEmail: string | undefined;
 }>;
 
+function formatOptionalField(value: string | undefined): string {
+  return value ?? "—";
+}
+
 export function UserTable({ users, permissions, accessTokenEmail }: UserTableProps) {
   if (users.length === 0) {
     return (
@@ -23,8 +27,9 @@ export function UserTable({ users, permissions, accessTokenEmail }: UserTablePro
         <thead className="bg-slate-900/80">
           <tr>
             <th className="px-4 py-3 text-left font-medium text-slate-400">Display name</th>
+            <th className="px-4 py-3 text-left font-medium text-slate-400">Given name</th>
+            <th className="px-4 py-3 text-left font-medium text-slate-400">Surname</th>
             <th className="px-4 py-3 text-left font-medium text-slate-400">Email</th>
-            <th className="px-4 py-3 text-left font-medium text-slate-400">ID</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 bg-slate-950/40">
@@ -46,8 +51,9 @@ export function UserTable({ users, permissions, accessTokenEmail }: UserTablePro
                     <span className="font-medium text-white">{user.displayName}</span>
                   )}
                 </td>
+                <td className="px-4 py-3 text-slate-300">{formatOptionalField(user.givenName)}</td>
+                <td className="px-4 py-3 text-slate-300">{formatOptionalField(user.surname)}</td>
                 <td className="px-4 py-3 text-slate-300">{user.email}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-500">{user.id}</td>
               </tr>
             );
           })}

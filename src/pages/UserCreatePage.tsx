@@ -48,7 +48,12 @@ export function UserCreatePage() {
             }
 
             createUser.mutate(
-              { email: values.email, displayName: values.displayName },
+              {
+                email: values.email,
+                displayName: values.displayName,
+                givenName: values.givenName,
+                surname: values.surname,
+              },
               {
                 onSuccess: (user) => {
                   navigate(`/users/${user.id}`);

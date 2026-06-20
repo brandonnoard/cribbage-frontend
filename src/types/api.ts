@@ -19,6 +19,8 @@ export type User = Readonly<{
   id: string;
   email: string;
   displayName: string;
+  givenName?: string;
+  surname?: string;
 }>;
 
 export type HealthStatus = Readonly<{
