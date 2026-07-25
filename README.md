@@ -63,13 +63,16 @@ Standalone Vite + React SPA for managing Cribbage user accounts. Authenticates v
 
 ## API surface used
 
-| Method | Path               | Auth |
-| ------ | ------------------ | ---- |
-| GET    | `/v1/users/health` | None |
-| GET    | `/v1/users`        | JWT  |
-| POST   | `/v1/users`        | JWT  |
-| GET    | `/v1/users/{id}`   | JWT  |
-| PUT    | `/v1/users/{id}`   | JWT  |
+| Method | Path                | Auth |
+| ------ | ------------------- | ---- |
+| GET    | `/v1/users/health`  | None |
+| GET    | `/v1/users`         | JWT  |
+| POST   | `/v1/users`         | JWT  |
+| GET    | `/v1/users/{id}`    | JWT  |
+| PUT    | `/v1/users/{id}`    | JWT  |
+| GET    | `/v1/leagues/health` | None |
+| GET    | `/v1/leagues`        | JWT  |
+| POST   | `/v1/leagues`        | JWT  |
 
 ## Deployment
 

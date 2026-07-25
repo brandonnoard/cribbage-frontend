@@ -23,6 +23,33 @@ export type User = Readonly<{
   surname?: string;
 }>;
 
+export type RosterPlayer = Readonly<{
+  playerId: string;
+  displayName: string;
+  email: string;
+}>;
+
+export type LeagueFormat =
+  | Readonly<{ type: "single-phase"; phase: "round-robin"; matchesPerWeek: 1 | 2 | 3 | 4 }>
+  | Readonly<{ type: "single-phase"; phase: "knockout" }>
+  | Readonly<{
+      type: "two-phase";
+      firstPhase: "round-robin";
+      matchesPerWeek: 1 | 2 | 3 | 4;
+      qualifyPercent: number;
+      secondPhase: "knockout";
+    }>
+  | Readonly<{ type: "two-phase"; firstPhase: "group"; secondPhase: "knockout" }>;
+
+export type League = Readonly<{
+  id: string;
+  name: string;
+  sizeLimit: number;
+  format: LeagueFormat;
+  startDate: string;
+  players: readonly RosterPlayer[];
+}>;
+
 export type HealthStatus = Readonly<{
   status: string;
   service: string;

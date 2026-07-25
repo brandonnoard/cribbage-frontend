@@ -4,6 +4,7 @@ import { Spinner } from "./components/ui/Spinner";
 import { PermissionRoute } from "./auth/PermissionRoute";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { AppShell } from "./components/layout/AppShell";
+import { StatusPage } from "./pages/StatusPage";
 import { WelcomePage } from "./pages/WelcomePage";
 
 function lazyNamed<T extends Record<string, ComponentType<unknown>>>(
@@ -24,6 +25,8 @@ function withSuspense(element: ReactNode, label: string): ReactNode {
 const UsersListPage = lazyNamed(() => import("./pages/UsersListPage"), "UsersListPage");
 const UserDetailPage = lazyNamed(() => import("./pages/UserDetailPage"), "UserDetailPage");
 const UserCreatePage = lazyNamed(() => import("./pages/UserCreatePage"), "UserCreatePage");
+const LeaguesListPage = lazyNamed(() => import("./pages/LeaguesListPage"), "LeaguesListPage");
+const LeagueCreatePage = lazyNamed(() => import("./pages/LeagueCreatePage"), "LeagueCreatePage");
 const LoginPage = lazyNamed(() => import("./pages/LoginPage"), "LoginPage");
 
 export function App() {
@@ -33,6 +36,7 @@ export function App() {
 
       <Route element={<AppShell />}>
         <Route index element={<WelcomePage />} />
+        <Route path="status" element={<StatusPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="users" element={withSuspense(<UsersListPage />, "Loading users…")} />
@@ -48,6 +52,18 @@ export function App() {
             }
           />
           <Route path="users/:id" element={withSuspense(<UserDetailPage />, "Loading user…")} />
+          <Route path="leagues" element={withSuspense(<LeaguesListPage />, "Loading leagues…")} />
+          <Route
+            path="leagues/new"
+            element={
+              <PermissionRoute
+                permission="league:create"
+                deniedMessage="You need the league:create permission to create leagues."
+              >
+                {withSuspense(<LeagueCreatePage />, "Loading…")}
+              </PermissionRoute>
+            }
+          />
         </Route>
       </Route>
 

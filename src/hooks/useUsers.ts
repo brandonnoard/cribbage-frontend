@@ -13,7 +13,7 @@ import {
 export const userKeys = {
   all: ["users"] as const,
   detail: (id: string) => ["users", id] as const,
-  health: ["health"] as const,
+  health: ["users", "health"] as const,
 };
 
 export function useHealthCheck() {

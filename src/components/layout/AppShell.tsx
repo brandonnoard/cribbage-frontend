@@ -4,26 +4,15 @@ import { useHasPermission } from "../../auth/useAccessTokenPermissions";
 import { absoluteAppUrl } from "../../config/basePath";
 import { auth0AuthorizationParams } from "../../config/auth0";
 import { isAuth0PlaceholderConfig } from "../../config/env";
-import { useHealthCheck } from "../../hooks/useUsers";
 import { Button } from "../ui/Button";
 
 export function AppShell() {
   const { user, isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
   const location = useLocation();
-  const health = useHealthCheck();
   const canReadUsers = useHasPermission("user:read");
-
-  const healthLabel = health.isLoading
-    ? "API: checking…"
-    : health.isError
-      ? "API: unreachable"
-      : "API: ok";
-
-  const healthClass = health.isError
-    ? "text-rose-400"
-    : health.isLoading
-      ? "text-slate-400"
-      : "text-emerald-400";
+  const canViewAllLeagues = useHasPermission("league:view");
+  const canViewOwnLeagues = useHasPermission("league:view:self");
+  const canViewLeagues = canViewAllLeagues || canViewOwnLeagues;
 
   const returnTo = `${location.pathname}${location.search}`;
 
@@ -44,41 +33,56 @@ export function AppShell() {
                   Users
                 </Link>
               ) : null}
+              {canViewLeagues ? (
+                <Link
+                  to="/leagues"
+                  className="rounded-md px-2 py-1 text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                >
+                  Leagues
+                </Link>
+              ) : null}
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className={`hidden text-xs sm:inline ${healthClass}`}>{healthLabel}</span>
-            {isAuthenticated ? (
-              <span className="hidden text-sm text-slate-400 sm:inline">{user?.email}</span>
-            ) : null}
-            {isLoading ? null : isAuthenticated ? (
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  logout({
-                    logoutParams: {
-                      returnTo: absoluteAppUrl(window.location.origin),
-                    },
-                  })
-                }
-              >
-                Log out
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                disabled={isAuth0PlaceholderConfig()}
-                onClick={() =>
-                  loginWithRedirect({
-                    appState: { returnTo },
-                    authorizationParams: auth0AuthorizationParams,
-                  })
-                }
-              >
-                Log in
-              </Button>
-            )}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-4">
+              {isAuthenticated ? (
+                <span className="hidden text-sm text-slate-400 sm:inline">{user?.email}</span>
+              ) : null}
+              {isLoading ? null : isAuthenticated ? (
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    logout({
+                      logoutParams: {
+                        returnTo: absoluteAppUrl(window.location.origin),
+                      },
+                    })
+                  }
+                >
+                  Log out
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  disabled={isAuth0PlaceholderConfig()}
+                  onClick={() =>
+                    loginWithRedirect({
+                      appState: { returnTo },
+                      authorizationParams: auth0AuthorizationParams,
+                    })
+                  }
+                >
+                  Log in
+                </Button>
+              )}
+            </div>
+            <Link
+              to="/status"
+              className="text-xs text-slate-400 transition hover:text-white"
+            >
+              Status
+            </Link>
           </div>
         </div>
       </header>
