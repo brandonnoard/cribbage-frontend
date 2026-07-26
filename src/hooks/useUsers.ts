@@ -25,12 +25,13 @@ export function useHealthCheck() {
   });
 }
 
-export function useUsersList() {
+export function useUsersList(options?: Readonly<{ enabled?: boolean }>) {
   const getToken = useApiToken();
 
   return useQuery({
     queryKey: userKeys.all,
     queryFn: () => listUsers(getToken),
+    enabled: options?.enabled ?? true,
   });
 }
 

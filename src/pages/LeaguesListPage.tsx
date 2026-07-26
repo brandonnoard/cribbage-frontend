@@ -21,6 +21,7 @@ function errorMessage(error: unknown): string {
 export function LeaguesListPage() {
   const leaguesQuery = useLeaguesList();
   const canCreateLeague = useHasPermission("league:create");
+  const canManagePlayers = useHasPermission("league:update");
 
   return (
     <div className="space-y-6">
@@ -47,7 +48,9 @@ export function LeaguesListPage() {
         <Alert title="Failed to load leagues" message={errorMessage(leaguesQuery.error)} />
       ) : null}
 
-      {leaguesQuery.data ? <LeagueTable leagues={leaguesQuery.data} /> : null}
+      {leaguesQuery.data ? (
+        <LeagueTable leagues={leaguesQuery.data} canManagePlayers={canManagePlayers} />
+      ) : null}
     </div>
   );
 }

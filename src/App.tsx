@@ -27,6 +27,7 @@ const UserDetailPage = lazyNamed(() => import("./pages/UserDetailPage"), "UserDe
 const UserCreatePage = lazyNamed(() => import("./pages/UserCreatePage"), "UserCreatePage");
 const LeaguesListPage = lazyNamed(() => import("./pages/LeaguesListPage"), "LeaguesListPage");
 const LeagueCreatePage = lazyNamed(() => import("./pages/LeagueCreatePage"), "LeagueCreatePage");
+const LeaguePlayersPage = lazyNamed(() => import("./pages/LeaguePlayersPage"), "LeaguePlayersPage");
 const LoginPage = lazyNamed(() => import("./pages/LoginPage"), "LoginPage");
 
 export function App() {
@@ -61,6 +62,17 @@ export function App() {
                 deniedMessage="You need the league:create permission to create leagues."
               >
                 {withSuspense(<LeagueCreatePage />, "Loading…")}
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="leagues/:id/players"
+            element={
+              <PermissionRoute
+                permission="league:update"
+                deniedMessage="You need the league:update permission to manage league players."
+              >
+                {withSuspense(<LeaguePlayersPage />, "Loading…")}
               </PermissionRoute>
             }
           />
