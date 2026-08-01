@@ -5,19 +5,14 @@ import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 
-const matchesPerWeekSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]);
-
 const createLeagueSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   sizeLimit: z.number().int().min(4, "Minimum size is 4").max(128, "Maximum size is 128"),
-  startDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD"),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD"),
   format: z.union([
     z.object({
       type: z.literal("single-phase"),
       phase: z.literal("round-robin"),
-      matchesPerWeek: matchesPerWeekSchema,
     }),
     z.object({
       type: z.literal("single-phase"),
@@ -26,7 +21,6 @@ const createLeagueSchema = z.object({
     z.object({
       type: z.literal("two-phase"),
       firstPhase: z.literal("round-robin"),
-      matchesPerWeek: matchesPerWeekSchema,
       qualifyPercent: z.number().int().min(1).max(100),
       secondPhase: z.literal("knockout"),
     }),
@@ -54,7 +48,6 @@ type LeagueFormProps = Readonly<{
 type FormatType = "single-phase" | "two-phase";
 type SinglePhase = "round-robin" | "knockout";
 type FirstPhase = "round-robin" | "group";
-type MatchesPerWeek = 1 | 2 | 3 | 4;
 
 function utcDatePlusDays(days: number): string {
   const date = new Date();
@@ -67,12 +60,11 @@ function buildFormat(
   formatType: FormatType,
   singlePhase: SinglePhase,
   firstPhase: FirstPhase,
-  matchesPerWeek: MatchesPerWeek,
   qualifyPercent: number,
 ): LeagueFormat {
   if (formatType === "single-phase") {
     if (singlePhase === "round-robin") {
-      return { type: "single-phase", phase: "round-robin", matchesPerWeek };
+      return { type: "single-phase", phase: "round-robin" };
     }
     return { type: "single-phase", phase: "knockout" };
   }
@@ -81,7 +73,6 @@ function buildFormat(
     return {
       type: "two-phase",
       firstPhase: "round-robin",
-      matchesPerWeek,
       qualifyPercent,
       secondPhase: "knockout",
     };
@@ -97,13 +88,9 @@ export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: Leag
   const [formatType, setFormatType] = useState<FormatType>("single-phase");
   const [singlePhase, setSinglePhase] = useState<SinglePhase>("round-robin");
   const [firstPhase, setFirstPhase] = useState<FirstPhase>("round-robin");
-  const [matchesPerWeek, setMatchesPerWeek] = useState<MatchesPerWeek>(1);
   const [qualifyPercent, setQualifyPercent] = useState("50");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const needsMatchesPerWeek =
-    (formatType === "single-phase" && singlePhase === "round-robin") ||
-    (formatType === "two-phase" && firstPhase === "round-robin");
   const needsQualifyPercent = formatType === "two-phase" && firstPhase === "round-robin";
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -111,13 +98,7 @@ export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: Leag
 
     const parsedSize = Number(sizeLimit);
     const parsedQualify = Number(qualifyPercent);
-    const format = buildFormat(
-      formatType,
-      singlePhase,
-      firstPhase,
-      matchesPerWeek,
-      parsedQualify,
-    );
+    const format = buildFormat(formatType, singlePhase, firstPhase, parsedQualify);
 
     const parsed = createLeagueSchema.safeParse({
       name,
@@ -202,20 +183,6 @@ export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: Leag
           <p className="text-xs text-slate-500">Second phase is always knockout.</p>
         </>
       )}
-
-      {needsMatchesPerWeek ? (
-        <Select
-          label="Matches per week"
-          value={String(matchesPerWeek)}
-          onChange={(event) => setMatchesPerWeek(Number(event.target.value) as MatchesPerWeek)}
-          error={errors["format.matchesPerWeek"]}
-        >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </Select>
-      ) : null}
 
       {needsQualifyPercent ? (
         <Input

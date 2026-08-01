@@ -30,12 +30,11 @@ export type RosterPlayer = Readonly<{
 }>;
 
 export type LeagueFormat =
-  | Readonly<{ type: "single-phase"; phase: "round-robin"; matchesPerWeek: 1 | 2 | 3 | 4 }>
+  | Readonly<{ type: "single-phase"; phase: "round-robin" }>
   | Readonly<{ type: "single-phase"; phase: "knockout" }>
   | Readonly<{
       type: "two-phase";
       firstPhase: "round-robin";
-      matchesPerWeek: 1 | 2 | 3 | 4;
       qualifyPercent: number;
       secondPhase: "knockout";
     }>

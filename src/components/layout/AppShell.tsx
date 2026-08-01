@@ -77,10 +77,7 @@ export function AppShell() {
                 </Button>
               )}
             </div>
-            <Link
-              to="/status"
-              className="text-xs text-slate-400 transition hover:text-white"
-            >
+            <Link to="/status" className="text-xs text-slate-400 transition hover:text-white">
               Status
             </Link>
           </div>
