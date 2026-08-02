@@ -1,16 +1,34 @@
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
+import { addUtcCalendarDays, utcToday } from "../../lib/calendar-date";
 import type { LeagueFormat } from "../../types/api";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 
-const createLeagueSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
-  sizeLimit: z.number().int().min(4, "Minimum size is 4").max(128, "Maximum size is 128"),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD"),
-  format: z.enum(["round-robin", "bracket", "prelims-bracket"]),
-});
+const leagueFormatSchema = z.enum(["round-robin", "bracket", "prelims-bracket"]);
+
+function buildLeagueSchema(minSizeLimit: number, earliestStartDate: string) {
+  return z.object({
+    name: z
+      .string()
+      .trim()
+      .min(2, "Name must be at least 2 characters")
+      .max(100, "Name is too long"),
+    sizeLimit: z
+      .number()
+      .int()
+      .min(minSizeLimit, `Minimum size is ${minSizeLimit}`)
+      .max(128, "Maximum size is 128"),
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD")
+      .refine((value) => value >= earliestStartDate, {
+        message: "Start date must be tomorrow or later (UTC)",
+      }),
+    format: leagueFormatSchema,
+  });
+}
 
 export type LeagueFormValues = Readonly<{
   name: string;
@@ -19,31 +37,38 @@ export type LeagueFormValues = Readonly<{
   format: LeagueFormat;
 }>;
 
+type LeagueFormMode = "create" | "edit";
+
 type LeagueFormProps = Readonly<{
+  mode?: LeagueFormMode;
+  initialValues?: LeagueFormValues;
+  /** Floor for size limit (at least 4; edit uses max(4, roster size)). */
+  minSizeLimit?: number;
   submitLabel: string;
   isSubmitting?: boolean;
   onSubmit: (values: LeagueFormValues) => void;
 }>;
 
-function utcDatePlusDays(days: number): string {
-  const date = new Date();
-  const utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  utc.setUTCDate(utc.getUTCDate() + days);
-  return utc.toISOString().slice(0, 10);
-}
-
-export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: LeagueFormProps) {
-  const [name, setName] = useState("");
-  const [sizeLimit, setSizeLimit] = useState("16");
-  const [startDate, setStartDate] = useState(() => utcDatePlusDays(1));
-  const [format, setFormat] = useState<LeagueFormat>("round-robin");
+export function LeagueForm({
+  mode = "create",
+  initialValues,
+  minSizeLimit = 4,
+  submitLabel,
+  isSubmitting = false,
+  onSubmit,
+}: LeagueFormProps) {
+  const earliestStartDate = addUtcCalendarDays(utcToday(), 1);
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [sizeLimit, setSizeLimit] = useState(String(initialValues?.sizeLimit ?? 16));
+  const [startDate, setStartDate] = useState(() => initialValues?.startDate ?? earliestStartDate);
+  const [format, setFormat] = useState<LeagueFormat>(initialValues?.format ?? "round-robin");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const parsedSize = Number(sizeLimit);
-    const parsed = createLeagueSchema.safeParse({
+    const parsed = buildLeagueSchema(minSizeLimit, earliestStartDate).safeParse({
       name,
       sizeLimit: Number.isFinite(parsedSize) ? parsedSize : Number.NaN,
       startDate,
@@ -75,18 +100,23 @@ export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: Leag
       <Input
         label="Size limit"
         type="number"
-        min={4}
+        min={minSizeLimit}
         max={128}
         value={sizeLimit}
         onChange={(event) => setSizeLimit(event.target.value)}
         error={errors.sizeLimit}
       />
+      {mode === "edit" && minSizeLimit > 4 ? (
+        <p className="text-xs text-slate-500">
+          Cannot be below the current roster size ({minSizeLimit}).
+        </p>
+      ) : null}
 
       <Input
         label="Start date"
         type="date"
         value={startDate}
-        min={utcDatePlusDays(1)}
+        min={earliestStartDate}
         onChange={(event) => setStartDate(event.target.value)}
         error={errors.startDate}
       />

@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
-import type { League } from "../../types/api";
+import type { League, LeagueFormat } from "../../types/api";
 
 type LeagueTableProps = Readonly<{
   leagues: League[];
   canManagePlayers?: boolean;
 }>;
+
+const FORMAT_LABELS: Record<LeagueFormat, string> = {
+  "round-robin": "Round Robin",
+  bracket: "Bracket",
+  "prelims-bracket": "Qualifying/Bracket",
+};
 
 function formatStartDate(startDate: string): string {
   const parsed = new Date(`${startDate}T00:00:00.000Z`);
@@ -35,22 +41,35 @@ export function LeagueTable({ leagues, canManagePlayers = false }: LeagueTablePr
         <thead className="bg-slate-900/80">
           <tr>
             <th className="px-4 py-3 text-left font-medium text-slate-400">Name</th>
+            <th className="px-4 py-3 text-left font-medium text-slate-400">Format</th>
             <th className="px-4 py-3 text-left font-medium text-slate-400">Start date</th>
             <th className="px-4 py-3 text-left font-medium text-slate-400">Players</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 bg-slate-950/40">
           {leagues.map((league) => {
-            const showManageLink = canManagePlayers && !league.locked;
+            const showUpdateLink = canManagePlayers && !league.locked;
             const remainingSpots = Math.max(0, league.sizeLimit - league.players.length);
             const playersLabel = `${league.players.length} (${remainingSpots} remaining)`;
 
             return (
               <tr key={league.id} className="transition hover:bg-slate-900/60">
-                <td className="px-4 py-3 font-medium text-white">{league.name}</td>
+                <td className="px-4 py-3">
+                  {showUpdateLink ? (
+                    <Link
+                      to={`/leagues/${league.id}/edit`}
+                      className="font-medium text-emerald-400 hover:underline"
+                    >
+                      {league.name}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-white">{league.name}</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-slate-300">{FORMAT_LABELS[league.format]}</td>
                 <td className="px-4 py-3 text-slate-300">{formatStartDate(league.startDate)}</td>
                 <td className="px-4 py-3 text-slate-300">
-                  {showManageLink ? (
+                  {showUpdateLink ? (
                     <Link
                       to={`/leagues/${league.id}/players`}
                       className="font-medium text-emerald-400 hover:underline"

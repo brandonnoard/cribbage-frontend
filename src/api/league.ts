@@ -8,6 +8,13 @@ export type CreateLeagueInput = Readonly<{
   startDate: string;
 }>;
 
+export type UpdateLeagueInput = Readonly<{
+  name: string;
+  sizeLimit: number;
+  format: LeagueFormat;
+  startDate: string;
+}>;
+
 export type AddLeaguePlayerInput = Readonly<{
   playerId: string;
   displayName: string;
@@ -29,6 +36,17 @@ export function getLeague(getToken: GetToken, id: string): Promise<League> {
 export function createLeague(getToken: GetToken, input: CreateLeagueInput): Promise<League> {
   return apiRequest<League>(getToken, "/v1/leagues", {
     method: "POST",
+    body: input,
+  });
+}
+
+export function updateLeague(
+  getToken: GetToken,
+  id: string,
+  input: UpdateLeagueInput,
+): Promise<League> {
+  return apiRequest<League>(getToken, `/v1/leagues/${encodeURIComponent(id)}`, {
+    method: "PUT",
     body: input,
   });
 }

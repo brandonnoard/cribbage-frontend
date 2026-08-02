@@ -6,8 +6,10 @@ import {
   healthCheck,
   listLeagues,
   removeLeaguePlayer,
+  updateLeague,
   type AddLeaguePlayerInput,
   type CreateLeagueInput,
+  type UpdateLeagueInput,
 } from "../api/league";
 import { useApiToken } from "../auth/useApiToken";
 
@@ -58,6 +60,19 @@ export function useCreateLeague() {
   return useMutation({
     mutationFn: (input: CreateLeagueInput) => createLeague(getToken, input),
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: leagueKeys.all });
+    },
+  });
+}
+
+export function useUpdateLeague(id: string) {
+  const getToken = useApiToken();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateLeagueInput) => updateLeague(getToken, id, input),
+    onSuccess: (league) => {
+      queryClient.setQueryData(leagueKeys.detail(id), league);
       void queryClient.invalidateQueries({ queryKey: leagueKeys.all });
     },
   });
