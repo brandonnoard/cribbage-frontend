@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { isRosterEditable } from "../../lib/calendar-date";
 import type { League } from "../../types/api";
 
 type LeagueTableProps = Readonly<{
@@ -42,10 +41,7 @@ export function LeagueTable({ leagues, canManagePlayers = false }: LeagueTablePr
         </thead>
         <tbody className="divide-y divide-slate-800 bg-slate-950/40">
           {leagues.map((league) => {
-            const showManageLink =
-              canManagePlayers &&
-              isRosterEditable(league.startDate) &&
-              league.players.length < league.sizeLimit;
+            const showManageLink = canManagePlayers && !league.locked;
             const remainingSpots = Math.max(0, league.sizeLimit - league.players.length);
             const playersLabel = `${league.players.length} (${remainingSpots} remaining)`;
 

@@ -84,7 +84,7 @@ function buildFormat(
 export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: LeagueFormProps) {
   const [name, setName] = useState("");
   const [sizeLimit, setSizeLimit] = useState("16");
-  const [startDate, setStartDate] = useState(() => utcDatePlusDays(14));
+  const [startDate, setStartDate] = useState(() => utcDatePlusDays(1));
   const [formatType, setFormatType] = useState<FormatType>("single-phase");
   const [singlePhase, setSinglePhase] = useState<SinglePhase>("round-robin");
   const [firstPhase, setFirstPhase] = useState<FirstPhase>("round-robin");
@@ -143,11 +143,11 @@ export function LeagueForm({ submitLabel, isSubmitting = false, onSubmit }: Leag
         label="Start date"
         type="date"
         value={startDate}
-        min={utcDatePlusDays(14)}
+        min={utcDatePlusDays(1)}
         onChange={(event) => setStartDate(event.target.value)}
         error={errors.startDate}
       />
-      <p className="text-xs text-slate-500">Must be at least 14 calendar days after today (UTC).</p>
+      <p className="text-xs text-slate-500">Must be at least 1 calendar day after today (UTC).</p>
 
       <Select
         label="League type"

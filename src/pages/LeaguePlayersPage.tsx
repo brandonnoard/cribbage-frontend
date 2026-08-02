@@ -7,7 +7,6 @@ import { Select } from "../components/ui/Select";
 import { Spinner } from "../components/ui/Spinner";
 import { useAddLeaguePlayer, useLeague, useRemoveLeaguePlayer } from "../hooks/useLeague";
 import { useUsersList } from "../hooks/useUsers";
-import { isRosterEditable } from "../lib/calendar-date";
 import { ApiRequestError, formatValidationMessage, type User } from "../types/api";
 
 function errorMessage(error: unknown): string {
@@ -77,16 +76,16 @@ export function LeaguePlayersPage() {
     return null;
   }
 
-  const rosterEditable = isRosterEditable(league.startDate);
   const rosterPlayerIds = new Set(league.players.map((player) => player.playerId));
   const availableUsers = (usersQuery.data ?? []).filter((user) => !rosterPlayerIds.has(user.id));
   const leagueFull = league.players.length >= league.sizeLimit;
+  const leagueLocked = league.locked;
   const mutationPending = addPlayer.isPending || removePlayer.isPending;
   const mutationError = addPlayer.error ?? removePlayer.error;
 
   function handleAddPlayer() {
     const user = availableUsers.find((candidate) => candidate.id === selectedUserId);
-    if (!user || !rosterEditable || leagueFull) {
+    if (!user || leagueLocked || leagueFull) {
       return;
     }
 
@@ -117,11 +116,11 @@ export function LeaguePlayersPage() {
         </p>
       </div>
 
-      {!rosterEditable ? (
+      {leagueLocked ? (
         <Alert
           variant="info"
-          title="Roster locked"
-          message="Players cannot be added or removed within 7 calendar days of the league start date."
+          title="League locked"
+          message="This league is locked and can no longer be changed."
         />
       ) : null}
 
@@ -153,7 +152,7 @@ export function LeaguePlayersPage() {
                     <td className="px-4 py-3 text-right">
                       <Button
                         variant="danger"
-                        disabled={!rosterEditable || mutationPending}
+                        disabled={leagueLocked || mutationPending}
                         onClick={() => removePlayer.mutate(player.playerId)}
                       >
                         Remove
@@ -195,7 +194,7 @@ export function LeaguePlayersPage() {
                   <Select
                     label="User"
                     value={selectedUserId}
-                    disabled={!rosterEditable || mutationPending}
+                    disabled={leagueLocked || mutationPending}
                     onChange={(event) => setSelectedUserId(event.target.value)}
                   >
                     <option value="">Select a user…</option>
@@ -207,7 +206,7 @@ export function LeaguePlayersPage() {
                   </Select>
                 </div>
                 <Button
-                  disabled={!selectedUserId || !rosterEditable || mutationPending}
+                  disabled={!selectedUserId || leagueLocked || mutationPending}
                   onClick={handleAddPlayer}
                 >
                   {addPlayer.isPending ? "Adding…" : "Add player"}

@@ -46,6 +46,7 @@ export type League = Readonly<{
   sizeLimit: number;
   format: LeagueFormat;
   startDate: string;
+  locked: boolean;
   players: readonly RosterPlayer[];
 }>;
 
