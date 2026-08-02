@@ -29,16 +29,7 @@ export type RosterPlayer = Readonly<{
   email: string;
 }>;
 
-export type LeagueFormat =
-  | Readonly<{ type: "single-phase"; phase: "round-robin" }>
-  | Readonly<{ type: "single-phase"; phase: "knockout" }>
-  | Readonly<{
-      type: "two-phase";
-      firstPhase: "round-robin";
-      qualifyPercent: number;
-      secondPhase: "knockout";
-    }>
-  | Readonly<{ type: "two-phase"; firstPhase: "group"; secondPhase: "knockout" }>;
+export type LeagueFormat = "round-robin" | "bracket" | "prelims-bracket";
 
 export type League = Readonly<{
   id: string;
